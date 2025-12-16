@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	
+	<flow name="post:\login:application\json:user-authentication-sapi-config">
+		<set-variable value="#[payload.password]" doc:name="Set Variable requestPassword" doc:id="62feb076-35d5-4afc-8cb9-76294647b4fd" variableName="requestPassword"/>
+		<os:retrieve doc:name="Retrieve" doc:id="39810a52-ba29-4e79-a3d7-e57f2399400d" key="#[payload.userName]" objectStore="user_Object_store">
+		</os:retrieve>
+		<try doc:name="Try" doc:id="d1967ce8-f9da-4a57-a792-2be32c865fd9" >
+			<validation:is-true doc:name="Is true" doc:id="53af69b0-193f-4b3a-bd63-52a3d26a1b69" expression="#[payload.password == vars.requestPassword]" message="Successfully logged in" />
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="343d6d84-e19d-44ea-9429-4b4b0d19712b" >
+					<set-payload value='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	"message": "Invalid username or password"&#10;}]' doc:name="Set Payload" doc:id="7985d279-b8f2-4304-99a6-82502fb1fb00" />
+				</on-error-continue>
+			</error-handler>
+		</try>
+		<choice doc:name="Choice" doc:id="9c2a7479-e1d1-46d2-b06b-4f99a6b4b977" >
+			<when expression='#[payload.message == "Invalid username or password"]'>
+				<logger level="INFO" doc:name="Logger" doc:id="2b6c2ed7-1b5f-488a-8e9f-fe009bdb8158" message="#[payload]"/>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="08c6d762-26c4-48b9-a196-1d605aa9e126" message='#[payload.userName ++ " Successfully logged in"]'/>
+				<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  status: "Success"
+} as Object {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+			</otherwise>
+		</choice>
+    </flow>
+	
+	</mule>
