@@ -8,9 +8,9 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
 http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
 	
-	<flow name="post:\register:application\json:user-authentication-sapi-config">
+	<flow name="post:\register:application\json:user-authentication-sapi-config" doc:id="2403a85c-8c79-40fd-ae88-f9047b60d430">
 		<try doc:name="Try" doc:id="53f6efe9-b90a-4589-b30a-223c6651bbf7" >
-			<validation:is-true doc:name="Is true" doc:id="f42e2888-c316-4362-b786-cb62d2d67ee7" expression="#[payload.password == payload.confirmPassword]" message="Invalid username or password" />
+			<validation:is-true doc:name="Is true" doc:id="f42e2888-c316-4362-b786-cb62d2d67ee7" expression="#[payload.password == payload.confirmPassword]" message="The password and confirm password should match" />
 			<error-handler >
 				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="95940e4b-a6e7-4814-84dc-d663de84ed8d" type="VALIDATION:INVALID_BOOLEAN">
 					<set-payload value='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	"message" : "The password and confirm password should match"&#10;}]' doc:name="Set Payload" doc:id="bf049407-204b-40de-9998-2775564c55a8" mimeType="application/json"/>
