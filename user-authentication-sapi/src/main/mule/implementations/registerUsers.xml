@@ -9,22 +9,11 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
 	
 	<flow name="post:\register:application\json:user-authentication-sapi-config" doc:id="2403a85c-8c79-40fd-ae88-f9047b60d430">
-		<try doc:name="Try" doc:id="53f6efe9-b90a-4589-b30a-223c6651bbf7" >
-			<validation:is-true doc:name="Is true" doc:id="f42e2888-c316-4362-b786-cb62d2d67ee7" expression="#[payload.password == payload.confirmPassword]" message="The password and confirm password should match" />
-			<error-handler >
-				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="95940e4b-a6e7-4814-84dc-d663de84ed8d" type="VALIDATION:INVALID_BOOLEAN">
-					<set-payload value='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	"message" : "The password and confirm password should match"&#10;}]' doc:name="Set Payload" doc:id="bf049407-204b-40de-9998-2775564c55a8" mimeType="application/json"/>
-				</on-error-continue>
-			</error-handler>
-		</try>
-		<choice doc:name="Choice" doc:id="f24721ab-231f-4717-9a2f-9495847743f1" >
-			<when expression='#[payload.message == "The password and confirm password should match"]'>
-				<logger level="INFO" doc:name="Logger" doc:id="863ec6b6-3eac-47e4-9d08-114182f39268" message="#[payload]"/>
-			</when>
-			<otherwise >
-				<set-variable value="#[payload.userName]" doc:name="Set Variable user" doc:id="35640904-a9aa-4661-b88d-78b1baef0358" variableName="user" />
-				<os:store doc:name="Store" doc:id="a2dab9d4-0f6b-4788-b4ce-440616002473" key="#[payload.userName]" objectStore="user_Object_store" failIfPresent="true" >
-					<os:value ><![CDATA[#[%dw 2.0
+		<choice doc:name="Choice" doc:id="daa80379-9fe0-4a6c-be41-49f4cff003e4" >
+			<when expression="#[payload.password == payload.confirmPassword]">
+				<set-variable value="#[payload.userName]" doc:name="Set Variable user" doc:id="67583c72-3ad2-4a43-8707-6727108ae97d" variableName="user" />
+				<os:store doc:name="Store" doc:id="25c7924e-6262-4667-aa66-a86969ac3b08" key="#[payload.userName]" objectStore="user_Object_store" failIfPresent="true">
+					<os:value><![CDATA[#[%dw 2.0
 output application/json
 import SHA1 from dw::Crypto
 import toBase64 from dw::core::Binaries
@@ -51,13 +40,37 @@ output application/json
 } as Object {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
             </ee:message>
         </ee:transform>
-				<logger level="INFO" doc:name="Logger" doc:id="f46b36b2-8150-43ff-8552-753f5d508352" message='#[payload.userName ++ " was successfully registered"]'/>
+				<logger level="INFO" doc:name="Logger" doc:id="884919a7-ba00-455d-928d-f0b919658c26" message='#[payload.userName ++ " was successfully registered"]' />
+			</when>
+			<when expression="#[payload.password != payload.confirmPassword]">
+				<ee:transform doc:name="Transform Message" doc:id="ac660264-ba8d-444d-83e7-d7c398e5a6f1" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	message: "The password and confirm Password should be the same."
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Transform Message" doc:id="a6080623-08fd-49b8-8830-3ec35a8c4316" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Invalid fields"
+} as Object {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
 			</otherwise>
 		</choice>
 		<error-handler >
-			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="887a8682-98cd-4886-ac13-29aaaf9c86e8" type="OS:KEY_ALREADY_EXISTS">
-				<set-payload value='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	"message" : vars.user ++ " already exists, Please try again."&#10;}]' doc:name="Set Payload" doc:id="5fc9baf8-57cd-491d-a208-3dc9017b2168" />
-				<logger level="INFO" doc:name="Logger" doc:id="0b3fe4fb-902d-4cfd-a71d-737803ce0276" message='#[vars.user ++ " already exists, Please try again" as String]' />
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="e6c36834-47a5-4346-86cd-8f27719f748f" type="OS:KEY_ALREADY_EXISTS">
+				<set-payload value='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	"message" : vars.user ++ " already exists, Please try again."&#10;}]' doc:name="Set Payload" doc:id="380ffe1c-5201-45a6-a0fb-11ca989c4cb2" />
+				<logger level="INFO" doc:name="Logger" doc:id="2ffa43d3-11ef-46d9-bf24-2d77216fb1ea" message='#[vars.user ++ " already exists, Please try again" as String]' />
 			</on-error-continue>
 		</error-handler>
     
