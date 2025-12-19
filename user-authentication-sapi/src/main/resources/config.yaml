@@ -1,2 +1,11 @@
 api:
   instanceid: "20654378"
+ 
+tls:
+  alias: "mule"
+  keyPassword: "password"
+  password: "password"
+  path: "keystore.jks"
+
+http:
+  port: "8081"
