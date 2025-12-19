@@ -1,4 +1,5 @@
 api:
+<<<<<<< HEAD
   instanceid: "20654378"
  
 tls:
@@ -9,3 +10,15 @@ tls:
 
 http:
   port: "8081"
+=======
+  instanceid: "api-manager-instance-id"
+
+tls:
+  alias: "keystore-alias"
+  keyPassword: "keystore-key-password"
+  password: "keystore-password"
+  path: "keystore-file-name"
+
+http:
+  port: "https-listener-port"
+>>>>>>> branch 'master' of https://github.com/gsadanalamss/vehicle-data.git
